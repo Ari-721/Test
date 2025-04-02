@@ -13,13 +13,16 @@ const database = firebase.database();
 
 // Post a comment
 function addComment() {
-    const commentText = document.getElementById("commentInput").value;
-    if (commentText.trim() === "") return;
+    const commentText = document.getElementById("commentInput").value.trim();
+    if (!commentText) return;
 
     database.ref("comments").push({
         text: commentText,
         timestamp: Date.now()
-    });
+    })
+    .then(() => console.log("✅ Comment saved to Firebase!"))
+    .catch((error) => console.error("❌ Firebase save error:", error));
+}
 
     document.getElementById("commentInput").value = "";
 }
