@@ -89,26 +89,30 @@ function setupComments() {
 // ========================
 // 4. LIKE SYSTEM (FIXED)
 // ========================
-window.likePhoto = async function(photoId) {
-  try {
-    // 1. Get current likes
-    const snapshot = await firebase.database().ref(`photos/${photoId}/likes`).once('value');
-    const currentLikes = snapshot.val() || 0;
+window.likePhoto = function(photoId) {
+  console.log("Like button clicked for:", photoId); // Debug 1
+  
+  const photoRef = firebase.database().ref(`photos/${photoId}`);
+  
+  photoRef.transaction((photo) => {
+    console.log("Current photo data:", photo); // Debug 2
     
-    // 2. Update likes (+1)
-    await firebase.database().ref(`photos/${photoId}`).update({
-      likes: currentLikes + 1
-    });
-    
-    // 3. Immediate UI update
-    document.querySelectorAll(`[data-id="${photoId}"] .like-count`).forEach(el => {
-      el.textContent = currentLikes + 1;
-    });
-    
-    console.log(`✅ Liked photo ${photoId}. New count: ${currentLikes + 1}`);
-  } catch (error) {
-    console.error("❌ Like error:", error);
-  }
+    if (!photo) {
+      return { likes: 1 }; // Initialize if doesn't exist
+    }
+    return {
+      ...photo,
+      likes: (photo.likes || 0) + 1
+    };
+  }).then((result) => {
+    console.log("Transaction result:", result); // Debug 3
+    if (result.committed) {
+      document.querySelectorAll(`[data-id="${photoId}"] .like-count`)
+        .forEach(el => el.textContent = result.snapshot.val().likes);
+    }
+  }).catch((error) => {
+    console.error("Full error:", error); // Debug 4
+  });
 };
 
 // ========================
