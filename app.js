@@ -89,21 +89,27 @@ function setupComments() {
 // ========================
 // 4. LIKE SYSTEM (FIXED)
 // ========================
-window.likePhoto = function(photoId) {
-  db.ref(`photos/${photoId}/likes`).transaction((likes) => {
-    return (likes || 0) + 1;
-  }).catch(console.error);
+window.likePhoto = async function(photoId) {
+  try {
+    // 1. Get current likes
+    const snapshot = await firebase.database().ref(`photos/${photoId}/likes`).once('value');
+    const currentLikes = snapshot.val() || 0;
+    
+    // 2. Update likes (+1)
+    await firebase.database().ref(`photos/${photoId}`).update({
+      likes: currentLikes + 1
+    });
+    
+    // 3. Immediate UI update
+    document.querySelectorAll(`[data-id="${photoId}"] .like-count`).forEach(el => {
+      el.textContent = currentLikes + 1;
+    });
+    
+    console.log(`✅ Liked photo ${photoId}. New count: ${currentLikes + 1}`);
+  } catch (error) {
+    console.error("❌ Like error:", error);
+  }
 };
-
-// Initialize likes display
-db.ref('photos').on('value', (snapshot) => {
-  snapshot.forEach((childSnapshot) => {
-    const photoId = childSnapshot.key;
-    const likes = childSnapshot.val().likes || 0;
-    const likeElements = document.querySelectorAll(`[data-id="${photoId}"] .like-count`);
-    likeElements.forEach(el => el.textContent = likes);
-  });
-});
 
 // ========================
 // 5. INITIALIZE EVERYTHING
