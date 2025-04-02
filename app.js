@@ -80,20 +80,51 @@ function setupComments() {
     }).catch(console.error);
 };
     // Load comments
-    db.ref('comments').on('child_added', (snapshot) => {
-      const comment = snapshot.val();
-      const commentsList = document.getElementById('commentsList');
-      if (commentsList) {
-        commentsList.innerHTML += `
-          <div class="comment">
-            <p><strong>${comment.author}:</strong> ${comment.text}</p>
-            <small>${new Date(comment.timestamp).toLocaleString()}</small>
-          </div>
-        `;
-      }
-    });
-  }
+    // Real-time comment listener with username support
+db.ref('comments').on('child_added', (snapshot) => {
+  const comment = snapshot.val();
+  const commentsList = document.getElementById('commentsList');
+  
+  if (!commentsList) return;
+
+  // Create DOM elements safely (no innerHTML)
+  const commentDiv = document.createElement('div');
+  commentDiv.className = 'comment';
+  commentDiv.dataset.id = snapshot.key; // Store Firebase ID
+  
+  // Sanitize user input (prevent XSS)
+  const sanitize = text => text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  
+  commentDiv.innerHTML = `
+    <div class="comment-header">
+      <span class="comment-author">${sanitize(comment.username || 'Anonymous')}</span>
+      <span class="comment-time">${formatTime(comment.timestamp)}</span>
+      <button class="delete-btn" data-id="${snapshot.key}">×</button>
+    </div>
+    <p class="comment-text">${sanitize(comment.text)}</p>
+  `;
+  
+  // Prepend for newest-first display
+  commentsList.prepend(commentDiv);
+});
+
+// Helper: Format timestamp
+function formatTime(timestamp) {
+  return new Date(timestamp).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 }
+
+// Delete comment function (add to your click handlers)
+window.deleteComment = function(commentId) {
+  if (confirm('Delete this comment?')) {
+    db.ref(`comments/${commentId}`).remove()
+      .catch(error => console.error('Delete failed:', error));
+  }
+};
 
 // ========================
 // 4. LIKE SYSTEM (FIXED)
