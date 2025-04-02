@@ -146,14 +146,20 @@
         <!-- Add more photo cards as needed -->
     </div>
 
-    <button id="comment-btn">💬</button>
-
-    <div class="comment-box">
-        <h3>Leave a Comment</h3>
-        <textarea id="commentInput" placeholder="Your comment..."></textarea>
-        <button onclick="addComment()">Post</button>
-        <div class="comments-list" id="commentsList"></div>
-    </div>
+    <button id="comment-btn">💬</button><div class="comment-box">
+    <h3>Leave a Comment</h3>
+    <!-- NEW USERNAME FIELD -->
+    <input 
+        type="text" 
+        id="commentUsername" 
+        placeholder="Your name (max 10 words)" 
+        maxlength="30"
+        required
+    >
+    <textarea id="commentInput" placeholder="Your comment..."></textarea>
+    <button onclick="addComment()">Post</button>
+    <div class="comments-list" id="commentsList"></div>
+</div>
 
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
