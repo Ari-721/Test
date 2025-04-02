@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Personal Gallery</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+        .gallery img { width: 100%; border-radius: 8px; }
+        .comment-section { margin-top: 30px; }
+        textarea, button { width: 100%; padding: 10px; margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <h1>My Photo Gallery</h1>
+    
+    <!-- Photo Grid -->
+    <div class="gallery">
+        <img src="photo1.jpg" alt="My Photo 1">
+        <img src="photo2.jpg" alt="My Photo 2">
+        <!-- Add more images here -->
+    </div>
+
+    <!-- Comment Section -->
+    <div class="comment-section">
+        <h2>Comments</h2>
+        <textarea id="commentInput" placeholder="Add a comment..."></textarea>
+        <button onclick="addComment()">Post Comment</button>
+        <div id="commentsList"></div>
+    </div>
+
+    <!-- Firebase & JavaScript -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
