@@ -9,42 +9,66 @@ firebase.initializeApp({
     appId: "1:670643976599:web:5f31e054919382271d2cd2"
 });
 
+
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
-// Post a comment
-function addComment() {
-    const commentText = document.getElementById("commentInput").value.trim();
-    if (!commentText) return;
-
-    database.ref("comments").push({
-        text: commentText,
-        timestamp: Date.now()
+// Load ALL comments when page loads
+function loadComments() {
+  database.ref("comments").once("value")
+    .then((snapshot) => {
+      const commentsList = document.getElementById("commentsList");
+      commentsList.innerHTML = ""; // Clear existing
+      
+      snapshot.forEach((childSnapshot) => {
+        const comment = childSnapshot.val();
+        commentsList.innerHTML += `
+          <div class="comment">
+            <p>${comment.text}</p>
+            <small>${new Date(comment.timestamp).toLocaleString()}</small>
+          </div>
+        `;
+      });
     })
-    .then(() => console.log("✅ Comment saved to Firebase!"))
-    .catch((error) => console.error("❌ Firebase save error:", error));
-}
-
-    document.getElementById("commentInput").value = "";
-}
-
-// Display comments
-// Load existing comments when the page opens
-window.onload = function() {
-    database.ref("comments").once("value", (snapshot) => {
-        snapshot.forEach((childSnapshot) => {
-            const comment = childSnapshot.val();
-            displayComment(comment);
-        });
+    .catch((error) => {
+      console.error("Error loading comments:", error);
     });
-};
-
-// Function to display a single comment
-function displayComment(comment) {
-    const commentsList = document.getElementById("commentsList");
-    commentsList.innerHTML += `<p><strong>User:</strong> ${comment.text}</p>`;
 }
 
-// Listen for NEW comments (real-time updates)
+// Post new comment
+function addComment() {
+  const commentText = document.getElementById("commentInput").value.trim();
+  if (!commentText) return;
+
+  const newComment = {
+    text: commentText,
+    timestamp: Date.now()
+  };
+
+  database.ref("comments").push(newComment)
+    .then(() => {
+      document.getElementById("commentInput").value = "";
+      console.log("Comment saved!");
+    })
+    .catch((error) => {
+      console.error("Error saving comment:", error);
+    });
+}
+
+// Real-time listener for new comments
 database.ref("comments").on("child_added", (snapshot) => {
-    displayComment(snapshot.val());
+  const comment = snapshot.val();
+  const commentsList = document.getElementById("commentsList");
+  
+  commentsList.innerHTML += `
+    <div class="comment">
+      <p>${comment.text}</p>
+      <small>${new Date(comment.timestamp).toLocaleString()}</small>
+    </div>
+  `;
 });
+
+// Load comments when page loads
+window.addEventListener("DOMContentLoaded", loadComments);
