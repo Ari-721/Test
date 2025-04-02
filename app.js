@@ -56,20 +56,29 @@ function setupComments() {
 
     // Post comment
     window.addComment = function() {
-      const commentInput = document.getElementById('commentInput');
-      const commentText = commentInput.value.trim();
-      
-      if (commentText) {
-        db.ref('comments').push({
-          text: commentText,
-          timestamp: Date.now(),
-          author: "User"
-        }).then(() => {
-          commentInput.value = '';
-        }).catch(console.error);
-      }
-    };
+    const usernameInput = document.getElementById('commentUsername');
+    const commentInput = document.getElementById('commentInput');
+    
+    // Validate username (10 words max)
+    const username = usernameInput.value.trim();
+    if (!username || username.split(/\s+/).length > 10) {
+        alert("Please enter a name (max 10 words)");
+        return;
+    }
 
+    // Validate comment
+    const commentText = commentInput.value.trim();
+    if (!commentText) return;
+
+    // Save to Firebase
+    database.ref('comments').push({
+        username: username,
+        text: commentText,
+        timestamp: Date.now()
+    }).then(() => {
+        commentInput.value = ''; // Clear comment field
+    }).catch(console.error);
+};
     // Load comments
     db.ref('comments').on('child_added', (snapshot) => {
       const comment = snapshot.val();
