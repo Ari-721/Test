@@ -28,8 +28,23 @@ function addComment() {
 }
 
 // Display comments
-database.ref("comments").on("child_added", (snapshot) => {
-    const comment = snapshot.val();
+// Load existing comments when the page opens
+window.onload = function() {
+    database.ref("comments").once("value", (snapshot) => {
+        snapshot.forEach((childSnapshot) => {
+            const comment = childSnapshot.val();
+            displayComment(comment);
+        });
+    });
+};
+
+// Function to display a single comment
+function displayComment(comment) {
     const commentsList = document.getElementById("commentsList");
     commentsList.innerHTML += `<p><strong>User:</strong> ${comment.text}</p>`;
+}
+
+// Listen for NEW comments (real-time updates)
+database.ref("comments").on("child_added", (snapshot) => {
+    displayComment(snapshot.val());
 });
