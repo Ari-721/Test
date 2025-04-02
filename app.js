@@ -11,64 +11,26 @@ firebase.initializeApp({
 
 
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+
+
 const database = firebase.database();
 
-// Load ALL comments when page loads
-function loadComments() {
-  database.ref("comments").once("value")
-    .then((snapshot) => {
-      const commentsList = document.getElementById("commentsList");
-      commentsList.innerHTML = ""; // Clear existing
-      
-      snapshot.forEach((childSnapshot) => {
-        const comment = childSnapshot.val();
-        commentsList.innerHTML += `
-          <div class="comment">
-            <p>${comment.text}</p>
-            <small>${new Date(comment.timestamp).toLocaleString()}</small>
-          </div>
-        `;
-      });
-    })
-    .catch((error) => {
-      console.error("Error loading comments:", error);
-    });
-}
-
-// Post new comment
+// Post a comment
 function addComment() {
-  const commentText = document.getElementById("commentInput").value.trim();
-  if (!commentText) return;
+    const commentText = document.getElementById("commentInput").value;
+    if (commentText.trim() === "") return;
 
-  const newComment = {
-    text: commentText,
-    timestamp: Date.now()
-  };
-
-  database.ref("comments").push(newComment)
-    .then(() => {
-      document.getElementById("commentInput").value = "";
-      console.log("Comment saved!");
-    })
-    .catch((error) => {
-      console.error("Error saving comment:", error);
+    database.ref("comments").push({
+        text: commentText,
+        timestamp: Date.now()
     });
+
+    document.getElementById("commentInput").value = "";
 }
 
-// Real-time listener for new comments
+// Display comments
 database.ref("comments").on("child_added", (snapshot) => {
-  const comment = snapshot.val();
-  const commentsList = document.getElementById("commentsList");
-  
-  commentsList.innerHTML += `
-    <div class="comment">
-      <p>${comment.text}</p>
-      <small>${new Date(comment.timestamp).toLocaleString()}</small>
-    </div>
-  `;
+    const comment = snapshot.val();
+    const commentsList = document.getElementById("commentsList");
+    commentsList.innerHTML += `<p><strong>User:</strong> ${comment.text}</p>`;
 });
-
-// Load comments when page loads
-window.addEventListener("DOMContentLoaded", loadComments);
